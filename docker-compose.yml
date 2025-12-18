@@ -1,0 +1,53 @@
+version: "3.5"
+
+services:
+  webserver:
+    build:
+      context: ./docker/webserver
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./:/var/www
+    links:
+      - db
+    networks:
+      palumni-external:
+        aliases:
+          - palumni.local
+      default:
+    command: "tail -f /dev/null"
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: 123
+      POSTGRES_DB: palumni
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      palumni-external:
+        aliases:
+          - palumni_db.local
+      default:  
+  redis:
+    build:
+      context: ./docker/redis
+    ports:
+      - "6380:6379"
+    environment:
+      - REDIS_REPLICATION_MODE=master
+      - ALLOW_EMPTY_PASSWORD=yes
+    volumes:
+      - ./docker/redis:/redis
+    links:
+      - webserver
+
+networks:
+  palumni-external:
+    name: palumni-external
+    external: true
