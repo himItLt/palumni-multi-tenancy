@@ -10,7 +10,7 @@ services:
     volumes:
       - ./:/var/www
     links:
-      - db
+      - postgres
     networks:
       palumni-external:
         aliases:
@@ -46,6 +46,8 @@ services:
       - ./docker/redis:/redis
     links:
       - webserver
+volumes:
+  postgres_data:
 
 networks:
   palumni-external:
